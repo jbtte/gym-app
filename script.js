@@ -120,3 +120,12 @@ function notificarAumentoCarga(exercicio) {
   // Abre em uma nova aba/janela
   window.open(whatsappUrl, '_blank');
 }
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./sw.js')
+      .then((reg) => console.log('Service Worker registrado!'))
+      .catch((err) => console.log('Erro ao registrar SW', err));
+  });
+}
