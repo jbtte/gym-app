@@ -137,3 +137,33 @@ small {
     display: inline-block;
     margin-top: 4px;
 }
+
+.peso-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.peso-ctrl .peso-display {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--text-main);
+    min-width: 42px;
+    text-align: center;
+}
+
+.peso-btn {
+    background: none;
+    border: none;
+    color: var(--text-sec);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    line-height: 1;
+}
+
+.peso-btn:active {
+    color: var(--text-main);
+}

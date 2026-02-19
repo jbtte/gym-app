@@ -73,23 +73,58 @@ function criarCardExercicio(ex) {
   let pesoDisplay =
     ex.peso_atual && ex.peso_atual > 0 ? `${ex.peso_atual} kg` : 'Corpo';
 
+  const pesoCtrl = ex.peso_atual > 0
+    ? `<div class="peso-ctrl" data-id="${ex.id}" data-peso="${ex.peso_atual}">
+         <button class="peso-btn">−</button>
+         <span class="peso-display">${pesoDisplay}</span>
+         <button class="peso-btn">+</button>
+       </div>`
+    : '';
+
   card.innerHTML = `
         <div class="color-bar" style="background-color: ${corGrupo}"></div>
         <div class="exercise-info">
             <div class="exercise-name">${ex.nome}</div>
             <div class="exercise-details">
-                <strong>${ex.series}x</strong> ${repsDisplay} | <span>${pesoDisplay}</span>
+                <strong>${ex.series}x</strong> ${repsDisplay}
                 ${ex.metodologia ? `<br><small style="color:${corGrupo}; font-weight:bold;">🛠️ ${ex.metodologia}</small>` : ''}
                 ${ex.notas_extras ? `<br><small style="font-style:italic; color:var(--text-sec)">${ex.notas_extras}</small>` : ''}
             </div>
         </div>
+        ${pesoCtrl}
     `;
+
+  if (ex.peso_atual > 0) {
+    const ctrl = card.querySelector('.peso-ctrl');
+    const [btnMenos, btnMais] = ctrl.querySelectorAll('.peso-btn');
+    btnMenos.addEventListener('click', (e) => { e.stopPropagation(); atualizarPeso(ctrl, -1); });
+    btnMais.addEventListener('click', (e) => { e.stopPropagation(); atualizarPeso(ctrl, +1); });
+  }
 
   adicionarEventosSwipe(card, ex);
   return card;
 }
 
-// Swipe: Direita (Check), Esquerda (WhatsApp + Log de Carga)
+async function atualizarPeso(ctrl, delta) {
+  const id = ctrl.dataset.id;
+  const pesoAtual = parseFloat(ctrl.dataset.peso);
+  const novoPeso = Math.max(0.5, pesoAtual + delta);
+
+  const { error } = await _supabase
+    .from('exercicios')
+    .update({ peso_atual: novoPeso })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Erro ao atualizar peso:', error);
+    return;
+  }
+
+  ctrl.dataset.peso = novoPeso;
+  ctrl.querySelector('.peso-display').textContent = `${novoPeso} kg`;
+}
+
+// Swipe Direita: CONCLUÍDO
 function adicionarEventosSwipe(elemento, ex) {
   let touchStartX = 0;
   const threshold = 80;
@@ -105,38 +140,18 @@ function adicionarEventosSwipe(elemento, ex) {
     const diffX = touchEndX - touchStartX;
 
     if (diffX > threshold) {
-      // Swipe Direita: CONCLUÍDO
       elemento.classList.toggle('done');
-      await registrarLogNoBanco(ex.id, true, false);
-    } else if (diffX < -threshold) {
-      // Swipe Esquerda: AUMENTO DE CARGA
-      notificarWhatsApp(ex.nome);
-      await registrarLogNoBanco(ex.id, true, true);
+      await registrarLogNoBanco(ex.id);
     }
   });
 }
 
-// Persistência real na tabela logs_treino
-async function registrarLogNoBanco(exercicioId, concluido, aumento) {
+async function registrarLogNoBanco(exercicioId) {
   const { error } = await _supabase.from('logs_treino').insert([
-    {
-      exercicio_id: exercicioId,
-      concluido: concluido,
-      aumento_carga: aumento,
-    },
+    { exercicio_id: exercicioId, concluido: true },
   ]);
 
   if (error) console.error('Erro ao salvar log no banco:', error);
-}
-
-function notificarWhatsApp(nomeExercicio) {
-  const meuNumero = '55619XXXXXXXX'; // Configure seu número aqui
-  const dataHj = new Date().toLocaleDateString('pt-BR');
-  const msg = `🚀 *PROGRESSÃO DE CARGA* - ${dataHj}\n\nExercicio: *${nomeExercicio}*\n_Registrado no Log do Supabase._`;
-  window.open(
-    `https://api.whatsapp.com/send?phone=${meuNumero}&text=${encodeURIComponent(msg)}`,
-    '_blank',
-  );
 }
 
 function voltarParaHome() {
