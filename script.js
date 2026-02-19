@@ -13,17 +13,40 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Renderiza os botões dos dias na Home
-function iniciarApp() {
+async function iniciarApp() {
   const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
   const daysList = document.getElementById('days-list');
   daysList.innerHTML = '';
 
+  const { data } = await _supabase
+    .from('exercicios')
+    .select('dia_semana, grupo_muscular')
+    .order('ordem', { ascending: true });
+
+  const gruposPorDia = {};
+  (data || []).forEach(({ dia_semana, grupo_muscular }) => {
+    if (!gruposPorDia[dia_semana]) gruposPorDia[dia_semana] = [];
+    if (!gruposPorDia[dia_semana].includes(grupo_muscular)) {
+      gruposPorDia[dia_semana].push(grupo_muscular);
+    }
+  });
+
   dias.forEach((dia) => {
     const btn = document.createElement('button');
     btn.className = 'day-btn';
-    // Capitaliza a primeira letra para o botão
     const titulo = dia.charAt(0).toUpperCase() + dia.slice(1);
-    btn.innerHTML = `${titulo} <span>Toque para iniciar o treino</span>`;
+    const gruposlista = (gruposPorDia[dia] || []).slice(0, 4);
+    const corPrincipal = `var(--${gruposlista[0] || 'cardio'})`;
+    const grupos = gruposlista
+      .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
+      .join(' · ');
+    btn.innerHTML = `
+      <div class="color-bar" style="background-color: ${corPrincipal}"></div>
+      <div class="day-info">
+        <span class="day-name">${titulo}</span>
+        <span class="day-groups">${grupos}</span>
+      </div>
+    `;
     btn.onclick = () => carregarTreinoDoBanco(dia);
     daysList.appendChild(btn);
   });
