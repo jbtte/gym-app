@@ -1,0 +1,232 @@
+{
+  "treino": {
+    "segunda": {
+      "foco": ["peito", "ombro", "triceps"],
+      "exercicios": [
+        {
+          "nome": "Supino reto barra",
+          "series": "4",
+          "repeticoes": "5–6",
+          "peso": "32 kg",
+          "grupo_muscular_principal": "peito"
+        },
+        {
+          "nome": "Supino inclinado halter",
+          "series": "3",
+          "repeticoes": "8–10",
+          "peso": "24 kg",
+          "grupo_muscular_principal": "peito"
+        },
+        {
+          "nome": "Desenvolvimento halter",
+          "series": "3",
+          "repeticoes": "8–10",
+          "peso": "28 kg",
+          "grupo_muscular_principal": "ombro"
+        },
+        {
+          "nome": "Elevação lateral",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "9 kg",
+          "grupo_muscular_principal": "ombro"
+        },
+        {
+          "nome": "Tríceps corda",
+          "series": "2",
+          "repeticoes": "12–15",
+          "peso": "27 kg",
+          "grupo_muscular_principal": "triceps"
+        },
+        {
+          "nome": "Bike intervalada",
+          "series": "—",
+          "repeticoes": "12 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio"
+        }
+      ]
+    },
+    "terca": {
+      "foco": ["costas", "biceps", "pernas"],
+      "exercicios": [
+        {
+          "nome": "Puxada máquina",
+          "series": "4",
+          "repeticoes": "6–8",
+          "peso": "80 kg",
+          "grupo_muscular_principal": "costas"
+        },
+        {
+          "nome": "Remada máquina",
+          "series": "3",
+          "repeticoes": "8–10",
+          "peso": "70 kg",
+          "grupo_muscular_principal": "costas"
+        },
+        {
+          "nome": "Pullover",
+          "series": "2",
+          "repeticoes": "12",
+          "peso": "27 kg",
+          "grupo_muscular_principal": "costas"
+        },
+        {
+          "nome": "Mesa flexora",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "48 kg",
+          "grupo_muscular_principal": "pernas"
+        },
+        {
+          "nome": "Rosca direta halter",
+          "series": "2",
+          "repeticoes": "10–12",
+          "peso": "16 kg",
+          "grupo_muscular_principal": "biceps"
+        },
+        {
+          "nome": "Escada ou remo",
+          "series": "—",
+          "repeticoes": "10 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio"
+        }
+      ]
+    },
+    "quarta": {
+      "foco": ["pernas", "core", "cardio"],
+      "exercicios": [
+        {
+          "nome": "Agachamento goblet",
+          "series": "3",
+          "repeticoes": "8–10",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "pernas"
+        },
+        {
+          "nome": "Stiff",
+          "series": "3",
+          "repeticoes": "8–10",
+          "peso": "60 kg",
+          "grupo_muscular_principal": "pernas"
+        },
+        {
+          "nome": "Panturrilha máquina",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "80 kg",
+          "grupo_muscular_principal": "pernas"
+        },
+        {
+          "nome": "Prancha",
+          "series": "3",
+          "repeticoes": "40s",
+          "peso": "—",
+          "grupo_muscular_principal": "core"
+        },
+        {
+          "nome": "Pallof press",
+          "series": "3",
+          "repeticoes": "10",
+          "peso": "—",
+          "grupo_muscular_principal": "core"
+        },
+        {
+          "nome": "Corrida",
+          "series": "—",
+          "repeticoes": "20–25 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio"
+        }
+      ]
+    },
+    "quinta": {
+      "foco": ["full body"],
+      "exercicios": [
+        {
+          "nome": "Leg press 45°",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "180 kg",
+          "grupo_muscular_principal": "pernas"
+        },
+        {
+          "nome": "Supino máquina",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "26 kg",
+          "grupo_muscular_principal": "peito"
+        },
+        {
+          "nome": "Remada baixa",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "70 kg",
+          "grupo_muscular_principal": "costas"
+        },
+        {
+          "nome": "Elevação lateral",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "9 kg",
+          "grupo_muscular_principal": "ombro"
+        },
+        {
+          "nome": "Rosca direta",
+          "series": "2",
+          "repeticoes": "10–12",
+          "peso": "14 kg",
+          "grupo_muscular_principal": "biceps"
+        },
+        {
+          "nome": "Tríceps corda",
+          "series": "2",
+          "repeticoes": "10–12",
+          "peso": "25 kg",
+          "grupo_muscular_principal": "triceps"
+        }
+      ]
+    },
+    "sexta": {
+      "foco": ["biceps", "triceps", "ombro"],
+      "exercicios": [
+        {
+          "nome": "Paralela",
+          "series": "3",
+          "repeticoes": "falha",
+          "peso": "corpo",
+          "grupo_muscular_principal": "triceps"
+        },
+        {
+          "nome": "Rosca alternada",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "16 kg",
+          "grupo_muscular_principal": "biceps"
+        },
+        {
+          "nome": "Tríceps testa",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "triceps"
+        },
+        {
+          "nome": "Face pull",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "ombro"
+        },
+        {
+          "nome": "Abdutor",
+          "series": "2",
+          "repeticoes": "12–15",
+          "peso": "mod",
+          "grupo_muscular_principal": "pernas"
+        }
+      ]
+    }
+  }
+}
