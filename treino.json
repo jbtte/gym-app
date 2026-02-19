@@ -41,12 +41,13 @@
         {
           "nome": "Bike intervalada",
           "series": "—",
-          "repeticoes": "12 min",
+          "repeticoes": "12 min (30s forte / 60s leve)",
           "peso": "—",
           "grupo_muscular_principal": "cardio"
         }
       ]
     },
+
     "terca": {
       "foco": ["costas", "biceps", "pernas"],
       "exercicios": [
@@ -88,12 +89,13 @@
         {
           "nome": "Escada ou remo",
           "series": "—",
-          "repeticoes": "10 min",
+          "repeticoes": "10 min contínuo",
           "peso": "—",
           "grupo_muscular_principal": "cardio"
         }
       ]
     },
+
     "quarta": {
       "foco": ["pernas", "core", "cardio"],
       "exercicios": [
@@ -126,7 +128,7 @@
           "grupo_muscular_principal": "core"
         },
         {
-          "nome": "Pallof press",
+          "nome": "Pallof press / Dead bug",
           "series": "3",
           "repeticoes": "10",
           "peso": "—",
@@ -141,6 +143,7 @@
         }
       ]
     },
+
     "quinta": {
       "foco": ["full body"],
       "exercicios": [
@@ -152,7 +155,7 @@
           "grupo_muscular_principal": "pernas"
         },
         {
-          "nome": "Supino máquina",
+          "nome": "Supino máquina ou halter",
           "series": "3",
           "repeticoes": "10–12",
           "peso": "26 kg",
@@ -185,17 +188,25 @@
           "repeticoes": "10–12",
           "peso": "25 kg",
           "grupo_muscular_principal": "triceps"
+        },
+        {
+          "nome": "Bike leve",
+          "series": "—",
+          "repeticoes": "10 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio"
         }
       ]
     },
+
     "sexta": {
       "foco": ["biceps", "triceps", "ombro"],
       "exercicios": [
         {
           "nome": "Paralela",
           "series": "3",
-          "repeticoes": "falha",
-          "peso": "corpo",
+          "repeticoes": "até falha técnica",
+          "peso": "peso corporal",
           "grupo_muscular_principal": "triceps"
         },
         {
@@ -206,7 +217,7 @@
           "grupo_muscular_principal": "biceps"
         },
         {
-          "nome": "Tríceps testa",
+          "nome": "Tríceps testa ou corda",
           "series": "3",
           "repeticoes": "10–12",
           "peso": "30 kg",
@@ -220,11 +231,18 @@
           "grupo_muscular_principal": "ombro"
         },
         {
-          "nome": "Abdutor",
+          "nome": "Abdutor / Glúteo máquina",
           "series": "2",
           "repeticoes": "12–15",
-          "peso": "mod",
+          "peso": "moderado",
           "grupo_muscular_principal": "pernas"
+        },
+        {
+          "nome": "Bike ou escada",
+          "series": "—",
+          "repeticoes": "10–12 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio"
         }
       ]
     }
