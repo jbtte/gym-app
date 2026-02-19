@@ -56,12 +56,18 @@ async function carregarTreinoDoBanco(dia) {
     const card = criarCardExercicio(ex);
     listContainer.appendChild(card);
   });
+
+  const btnFinalizar = document.getElementById('btn-finalizar');
+  btnFinalizar.textContent = 'Finalizar Treino';
+  btnFinalizar.disabled = false;
+  btnFinalizar.classList.remove('hidden');
 }
 
 // Cria o HTML do exercício baseado no Schema Pro
 function criarCardExercicio(ex) {
   const card = document.createElement('div');
   card.className = 'exercise-card';
+  card.dataset.id = ex.id;
   const corGrupo = `var(--${ex.grupo_muscular || 'cardio'})`;
 
   // Lógica para Repetições (Schema Pro)
@@ -141,20 +147,38 @@ function adicionarEventosSwipe(elemento, ex) {
 
     if (diffX > threshold) {
       elemento.classList.toggle('done');
-      await registrarLogNoBanco(ex.id);
     }
   });
 }
 
-async function registrarLogNoBanco(exercicioId) {
-  const { error } = await _supabase.from('logs_treino').insert([
-    { exercicio_id: exercicioId, concluido: true },
-  ]);
+async function finalizarTreino() {
+  const cards = document.querySelectorAll('.exercise-card.done');
+  if (cards.length === 0) {
+    voltarParaHome();
+    return;
+  }
 
-  if (error) console.error('Erro ao salvar log no banco:', error);
+  const btn = document.getElementById('btn-finalizar');
+  btn.disabled = true;
+
+  const logs = Array.from(cards).map((card) => ({
+    exercicio_id: card.dataset.id,
+    concluido: true,
+  }));
+
+  const { error } = await _supabase.from('logs_treino').insert(logs);
+
+  if (error) {
+    console.error('Erro ao finalizar treino:', error);
+    btn.disabled = false;
+    return;
+  }
+
+  voltarParaHome();
 }
 
 function voltarParaHome() {
   document.getElementById('workout-view').classList.add('hidden');
+  document.getElementById('btn-finalizar').classList.add('hidden');
   document.getElementById('home-view').classList.remove('hidden');
 }

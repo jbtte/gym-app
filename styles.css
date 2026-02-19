@@ -167,3 +167,20 @@ small {
 .peso-btn:active {
     color: var(--text-main);
 }
+
+#btn-finalizar {
+    display: block;
+    width: 100%;
+    background-color: var(--card-bg);
+    color: var(--text-sec);
+    border: 1px solid var(--text-sec);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#btn-finalizar:disabled {
+    opacity: 0.4;
+}
