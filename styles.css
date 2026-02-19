@@ -120,3 +120,20 @@ h1, h2 {
 }
 
 .exercise-details span { color: var(--text-main); }
+
+.exercise-details {
+    font-size: 0.9rem;
+    color: var(--text-sec);
+    line-height: 1.4; /* Melhora leitura de textos com 2 linhas */
+}
+
+.exercise-details span {
+    color: var(--text-main);
+    font-weight: bold;
+}
+
+small {
+    font-size: 0.75rem;
+    display: inline-block;
+    margin-top: 4px;
+}

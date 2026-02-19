@@ -1,131 +1,145 @@
-let dadosTreino = {};
+// Configurações do Supabase (Substitua pelos seus dados do Painel > Settings > API)
+const supabaseUrl = 'https://vmoexatgbxjgaiaqgljp.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtb2V4YXRnYnhqZ2FpYXFnbGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTU3MTUsImV4cCI6MjA4NzA5MTcxNX0.g0g2T75guHP1NPZVVohMSRTPPE2W9CQDJ9wLoe_XglM';
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Solicita permissão para notificações do navegador
-if ('Notification' in window) {
-  Notification.requestPermission();
-}
+document.addEventListener('DOMContentLoaded', () => {
+  iniciarApp();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('./sw.js')
+      .catch((err) => console.log('Erro SW:', err));
+  }
+});
 
-// Carrega o JSON via Fetch API
-fetch('treino.json')
-  .then((response) => response.json())
-  .then((data) => {
-    dadosTreino = data;
-    iniciarApp();
-  })
-  .catch((error) => console.error('Erro ao carregar o treino.json:', error));
-
+// Renderiza os botões dos dias na Home
 function iniciarApp() {
+  const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
   const daysList = document.getElementById('days-list');
-  for (const dia in dadosTreino.treino) {
+  daysList.innerHTML = '';
+
+  dias.forEach((dia) => {
     const btn = document.createElement('button');
     btn.className = 'day-btn';
-    const focos = dadosTreino.treino[dia].foco.join(', ');
-    btn.innerHTML = `${dia} <span>Foco: ${focos}</span>`;
-    btn.onclick = () => carregarTreino(dia);
+    // Capitaliza a primeira letra para o botão
+    const titulo = dia.charAt(0).toUpperCase() + dia.slice(1);
+    btn.innerHTML = `${titulo} <span>Toque para iniciar o treino</span>`;
+    btn.onclick = () => carregarTreinoDoBanco(dia);
     daysList.appendChild(btn);
-  }
+  });
 }
 
-function carregarTreino(dia) {
+// Busca os exercícios do Supabase
+async function carregarTreinoDoBanco(dia) {
   document.getElementById('home-view').classList.add('hidden');
   document.getElementById('workout-view').classList.remove('hidden');
   document.getElementById('workout-title').innerText = `Treino de ${dia}`;
 
   const listContainer = document.getElementById('exercise-list');
+  listContainer.innerHTML =
+    '<p style="text-align:center; padding:20px;">Buscando ficha no banco...</p>';
+
+  const { data, error } = await _supabase
+    .from('exercicios')
+    .select('*')
+    .eq('dia_semana', dia)
+    .order('ordem', { ascending: true });
+
+  if (error) {
+    console.error('Erro:', error);
+    listContainer.innerHTML = '<p>Erro ao conectar com o banco de dados.</p>';
+    return;
+  }
+
   listContainer.innerHTML = '';
-
-  const exercicios = dadosTreino.treino[dia].exercicios;
-
-  exercicios.forEach((ex) => {
-    const card = document.createElement('div');
-    card.className = 'exercise-card';
-
-    const corGrupo = `var(--${ex.grupo_muscular_principal})`;
-
-    let detalhes =
-      ex.series !== '—'
-        ? `${ex.series}x ${ex.repeticoes} reps`
-        : `${ex.repeticoes}`;
-    if (ex.peso !== '—') detalhes += ` - <span>${ex.peso}</span>`;
-
-    card.innerHTML = `
-            <div class="color-bar" style="background-color: ${corGrupo}"></div>
-            <div class="exercise-info">
-                <div class="exercise-name">${ex.nome}</div>
-                <div class="exercise-details" style="color: ${corGrupo}">
-                    ${detalhes}
-                </div>
-            </div>
-        `;
-
-    adicionarEventosDeSwipe(card, ex.nome);
+  data.forEach((ex) => {
+    const card = criarCardExercicio(ex);
     listContainer.appendChild(card);
   });
+}
+
+// Cria o HTML do exercício baseado no Schema Pro
+function criarCardExercicio(ex) {
+  const card = document.createElement('div');
+  card.className = 'exercise-card';
+  const corGrupo = `var(--${ex.grupo_muscular || 'cardio'})`;
+
+  // Lógica para Repetições (Schema Pro)
+  let repsDisplay = ex.is_ate_falha
+    ? 'Até a falha'
+    : `${ex.repeticoes_min}-${ex.repeticoes_max}`;
+
+  // Lógica para Peso (Se 0 ou nulo, exibe 'Corpo')
+  let pesoDisplay =
+    ex.peso_atual && ex.peso_atual > 0 ? `${ex.peso_atual} kg` : 'Corpo';
+
+  card.innerHTML = `
+        <div class="color-bar" style="background-color: ${corGrupo}"></div>
+        <div class="exercise-info">
+            <div class="exercise-name">${ex.nome}</div>
+            <div class="exercise-details">
+                <strong>${ex.series}x</strong> ${repsDisplay} | <span>${pesoDisplay}</span>
+                ${ex.metodologia ? `<br><small style="color:${corGrupo}; font-weight:bold;">🛠️ ${ex.metodologia}</small>` : ''}
+                ${ex.notas_extras ? `<br><small style="font-style:italic; color:var(--text-sec)">${ex.notas_extras}</small>` : ''}
+            </div>
+        </div>
+    `;
+
+  adicionarEventosSwipe(card, ex);
+  return card;
+}
+
+// Swipe: Direita (Check), Esquerda (WhatsApp + Log de Carga)
+function adicionarEventosSwipe(elemento, ex) {
+  let touchStartX = 0;
+  const threshold = 80;
+
+  elemento.addEventListener(
+    'touchstart',
+    (e) => (touchStartX = e.changedTouches[0].screenX),
+    { passive: true },
+  );
+
+  elemento.addEventListener('touchend', async (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const diffX = touchEndX - touchStartX;
+
+    if (diffX > threshold) {
+      // Swipe Direita: CONCLUÍDO
+      elemento.classList.toggle('done');
+      await registrarLogNoBanco(ex.id, true, false);
+    } else if (diffX < -threshold) {
+      // Swipe Esquerda: AUMENTO DE CARGA
+      notificarWhatsApp(ex.nome);
+      await registrarLogNoBanco(ex.id, true, true);
+    }
+  });
+}
+
+// Persistência real na tabela logs_treino
+async function registrarLogNoBanco(exercicioId, concluido, aumento) {
+  const { error } = await _supabase.from('logs_treino').insert([
+    {
+      exercicio_id: exercicioId,
+      concluido: concluido,
+      aumento_carga: aumento,
+    },
+  ]);
+
+  if (error) console.error('Erro ao salvar log no banco:', error);
+}
+
+function notificarWhatsApp(nomeExercicio) {
+  const meuNumero = '55619XXXXXXXX'; // Configure seu número aqui
+  const dataHj = new Date().toLocaleDateString('pt-BR');
+  const msg = `🚀 *PROGRESSÃO DE CARGA* - ${dataHj}\n\nExercicio: *${nomeExercicio}*\n_Registrado no Log do Supabase._`;
+  window.open(
+    `https://api.whatsapp.com/send?phone=${meuNumero}&text=${encodeURIComponent(msg)}`,
+    '_blank',
+  );
 }
 
 function voltarParaHome() {
   document.getElementById('workout-view').classList.add('hidden');
   document.getElementById('home-view').classList.remove('hidden');
-}
-
-function adicionarEventosDeSwipe(elemento, nomeExercicio) {
-  let touchStartX = 0;
-  let touchEndX = 0;
-  const threshold = 80;
-
-  elemento.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-    elemento.style.transition = 'none';
-  });
-
-  elemento.addEventListener('touchmove', (e) => {
-    let currentX = e.changedTouches[0].screenX;
-    let diffX = currentX - touchStartX;
-    if (diffX > -150 && diffX < 150) {
-      elemento.style.transform = `translateX(${diffX}px)`;
-    }
-  });
-
-  elemento.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    elemento.style.transition = 'transform 0.2s ease-out';
-    elemento.style.transform = 'translateX(0px)';
-
-    let diffX = touchEndX - touchStartX;
-
-    if (diffX > threshold) {
-      elemento.classList.toggle('done');
-    } else if (diffX < -threshold) {
-      notificarAumentoCarga(nomeExercicio);
-    }
-  });
-}
-
-function notificarAumentoCarga(exercicio) {
-  // Substitua pelo seu número (DDI + DDD + Número)
-  // Exemplo para Brasília: 5561999999999
-  const meuNumero = '55619XXXXXXXX';
-
-  // Formatação em Markdown do WhatsApp para facilitar o log
-  const dataAtual = new Date().toLocaleDateString('pt-BR');
-  const mensagem =
-    `📌 *LOG DE TREINO - ${dataAtual}*\n\n` +
-    `🚀 *Ajuste Necessário:* Aumentar carga\n` +
-    `🏋️ *Exercício:* ${exercicio}\n\n` +
-    `_Enviado via GymApp_`;
-
-  // Abre o link da API do WhatsApp
-  const whatsappUrl = `https://api.whatsapp.com/send?phone=${meuNumero}&text=${encodeURIComponent(mensagem)}`;
-
-  // Abre em uma nova aba/janela
-  window.open(whatsappUrl, '_blank');
-}
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('./sw.js')
-      .then((reg) => console.log('Service Worker registrado!'))
-      .catch((err) => console.log('Erro ao registrar SW', err));
-  });
 }
