@@ -1,0 +1,23 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *'  # a cada 3 dias, ao meio-dia UTC
+  workflow_dispatch:         # permite rodar manualmente
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://vmoexatgbxjgaiaqgljp.supabase.co/rest/v1/exercicios?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtb2V4YXRnYnhqZ2FpYXFnbGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTU3MTUsImV4cCI6MjA4NzA5MTcxNX0.g0g2T75guHP1NPZVVohMSRTPPE2W9CQDJ9wLoe_XglM" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtb2V4YXRnYnhqZ2FpYXFnbGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTU3MTUsImV4cCI6MjA4NzA5MTcxNX0.g0g2T75guHP1NPZVVohMSRTPPE2W9CQDJ9wLoe_XglM")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Ping falhou com status $STATUS"
+            exit 1
+          fi
+          echo "Supabase ativo."
