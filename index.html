@@ -17,6 +17,15 @@
     <div id="home-view">
       <h1>Meus Treinos</h1>
       <div id="days-list"></div>
+      <button class="progress-link" onclick="carregarProgresso()">Ver progressão de carga →</button>
+    </div>
+
+    <div id="progress-view" class="hidden">
+      <div class="header-treino">
+        <button class="back-btn" onclick="voltarParaHome()">&#8592; Voltar</button>
+        <h2>Progressão</h2>
+      </div>
+      <div id="progress-list"></div>
     </div>
 
     <div id="workout-view" class="hidden">

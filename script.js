@@ -75,9 +75,8 @@ async function carregarTreinoDoBanco(dia) {
   }
 
   listContainer.innerHTML = '';
-  data.forEach((ex) => {
-    const card = criarCardExercicio(ex);
-    listContainer.appendChild(card);
+  agruparExercicios(data).forEach((grupo) => {
+    listContainer.appendChild(renderGrupo(grupo));
   });
 
   const btnFinalizar = document.getElementById('btn-finalizar');
@@ -86,8 +85,77 @@ async function carregarTreinoDoBanco(dia) {
   btnFinalizar.classList.remove('hidden');
 }
 
+function parseGrupoKey(metodologia) {
+  if (!metodologia) return null;
+  const lower = metodologia.toLowerCase().trim();
+  const m = lower.match(/^(superset|bi-?set)\s+([a-z])\b/);
+  if (m) return `${m[1].replace('-', '')}-${m[2]}`;
+  if (lower.startsWith('circuito')) return 'circuito';
+  return null;
+}
+
+function parseGrupoLabel(metodologia) {
+  if (!metodologia) return null;
+  const lower = metodologia.toLowerCase().trim();
+  const m = lower.match(/^(superset|bi-?set)\s+([a-z])\b/);
+  if (m) return `${m[1].charAt(0).toUpperCase() + m[1].slice(1)} ${m[2].toUpperCase()}`;
+  if (lower.startsWith('circuito')) return 'Circuito';
+  return null;
+}
+
+function agruparExercicios(exercises) {
+  const groups = [];
+  const seenKeys = new Set();
+  const processedIdx = new Set();
+
+  exercises.forEach((ex, i) => {
+    if (processedIdx.has(i)) return;
+    const key = parseGrupoKey(ex.metodologia);
+
+    if (key && !seenKeys.has(key)) {
+      seenKeys.add(key);
+      const membros = [];
+      exercises.forEach((e, j) => {
+        if (parseGrupoKey(e.metodologia) === key) {
+          membros.push(e);
+          processedIdx.add(j);
+        }
+      });
+      groups.push({ label: parseGrupoLabel(ex.metodologia), exercicios: membros, isGroup: true });
+    } else if (!key) {
+      processedIdx.add(i);
+      groups.push({ label: null, exercicios: [ex], isGroup: false });
+    }
+  });
+
+  return groups;
+}
+
+function renderGrupo(grupo) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'exercise-group';
+
+  if (grupo.label) {
+    const label = document.createElement('div');
+    label.className = 'group-label';
+    label.textContent = grupo.label;
+    wrapper.appendChild(label);
+  }
+
+  if (grupo.isGroup) {
+    const cards = document.createElement('div');
+    cards.className = 'group-cards';
+    grupo.exercicios.forEach((ex) => cards.appendChild(criarCardExercicio(ex, false)));
+    wrapper.appendChild(cards);
+  } else {
+    grupo.exercicios.forEach((ex) => wrapper.appendChild(criarCardExercicio(ex, true)));
+  }
+
+  return wrapper;
+}
+
 // Cria o HTML do exercício baseado no Schema Pro
-function criarCardExercicio(ex) {
+function criarCardExercicio(ex, showMetodologia = true) {
   const card = document.createElement('div');
   card.className = 'exercise-card';
   card.dataset.id = ex.id;
@@ -96,7 +164,9 @@ function criarCardExercicio(ex) {
   // Lógica para Repetições (Schema Pro)
   let repsDisplay = ex.is_ate_falha
     ? 'Até a falha'
-    : `${ex.repeticoes_min}-${ex.repeticoes_max}`;
+    : ex.repeticoes_min === ex.repeticoes_max
+      ? `${ex.repeticoes_min}`
+      : `${ex.repeticoes_min}-${ex.repeticoes_max}`;
 
   // Lógica para Peso (Se 0 ou nulo, exibe 'Corpo')
   let pesoDisplay =
@@ -116,7 +186,7 @@ function criarCardExercicio(ex) {
             <div class="exercise-name">${ex.nome}</div>
             <div class="exercise-details">
                 <strong>${ex.series}x</strong> ${repsDisplay}
-                ${ex.metodologia ? `<br><small style="color:${corGrupo}; font-weight:bold;">🛠️ ${ex.metodologia}</small>` : ''}
+                ${showMetodologia && ex.metodologia ? `<br><small style="color:${corGrupo}; font-weight:bold;">🛠️ ${ex.metodologia}</small>` : ''}
                 ${ex.notas_extras ? `<br><small style="font-style:italic; color:var(--text-sec)">${ex.notas_extras}</small>` : ''}
             </div>
         </div>
@@ -177,17 +247,22 @@ function adicionarEventosSwipe(elemento, ex) {
 async function finalizarTreino() {
   const cards = document.querySelectorAll('.exercise-card.done');
   if (cards.length === 0) {
-    voltarParaHome();
+    alert('Marque pelo menos um exercício antes de finalizar.');
     return;
   }
 
   const btn = document.getElementById('btn-finalizar');
   btn.disabled = true;
 
-  const logs = Array.from(cards).map((card) => ({
-    exercicio_id: card.dataset.id,
-    concluido: true,
-  }));
+  const logs = Array.from(cards).map((card) => {
+    const pesoCtrl = card.querySelector('.peso-ctrl');
+    return {
+      exercicio_id: card.dataset.id,
+      nome_exercicio: card.querySelector('.exercise-name').textContent,
+      concluido: true,
+      peso_usado: pesoCtrl ? parseFloat(pesoCtrl.dataset.peso) || null : null,
+    };
+  });
 
   const { error } = await _supabase.from('logs_treino').insert(logs);
 
@@ -202,6 +277,104 @@ async function finalizarTreino() {
 
 function voltarParaHome() {
   document.getElementById('workout-view').classList.add('hidden');
+  document.getElementById('progress-view').classList.add('hidden');
   document.getElementById('btn-finalizar').classList.add('hidden');
   document.getElementById('home-view').classList.remove('hidden');
+}
+
+async function carregarProgresso() {
+  document.getElementById('home-view').classList.add('hidden');
+  document.getElementById('progress-view').classList.remove('hidden');
+
+  const container = document.getElementById('progress-list');
+  container.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-sec)">Carregando...</p>';
+
+  const { data, error } = await _supabase
+    .from('logs_treino')
+    .select('created_at, peso_usado, nome_exercicio, exercicios(nome, grupo_muscular)')
+    .not('peso_usado', 'is', null)
+    .gt('peso_usado', 0)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    container.innerHTML = '<p style="text-align:center;padding:40px;">Erro ao carregar dados.</p>';
+    return;
+  }
+
+  const byExercise = {};
+  (data || []).forEach((log) => {
+    const nome = log.exercicios?.nome || log.nome_exercicio;
+    const grupo = log.exercicios?.grupo_muscular || 'cardio';
+    if (!nome) return;
+    if (!byExercise[nome]) byExercise[nome] = { grupo, entradas: [] };
+    byExercise[nome].entradas.push({
+      date: new Date(log.created_at),
+      peso: log.peso_usado,
+    });
+  });
+
+  const entries = Object.entries(byExercise);
+
+  if (entries.length === 0) {
+    container.innerHTML = `
+      <p style="text-align:center;padding:40px;color:var(--text-sec);line-height:1.6">
+        Nenhuma progressão registrada ainda.<br>
+        <small>Complete alguns treinos para ver os dados aqui.</small>
+      </p>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  entries.forEach(([nome, { grupo, entradas }]) => {
+    container.appendChild(criarCardProgresso(nome, grupo, entradas));
+  });
+}
+
+function criarCardProgresso(nome, grupo, entradas) {
+  const card = document.createElement('div');
+  card.className = 'progress-card';
+
+  const cor = `var(--${grupo || 'cardio'})`;
+  const pesos = entradas.map((e) => e.peso);
+  const pesoAtual = pesos[pesos.length - 1];
+  const delta = pesoAtual - pesos[0];
+  const deltaStr = delta === 0 ? '' : (delta > 0 ? `+${delta} kg` : `${delta} kg`);
+  const deltaClass = delta > 0 ? 'delta-pos' : delta < 0 ? 'delta-neg' : '';
+
+  card.innerHTML = `
+    <div class="color-bar" style="background-color:${cor}"></div>
+    <div class="progress-info">
+      <div class="progress-name">${nome}</div>
+      <div class="progress-meta">
+        <span class="progress-weight">${pesoAtual} kg</span>
+        ${deltaStr ? `<span class="progress-delta ${deltaClass}">${deltaStr}</span>` : ''}
+        <span class="progress-count">${entradas.length} sessões</span>
+      </div>
+    </div>
+    <div class="sparkline" style="color:${cor}">${sparkline(pesos)}</div>
+  `;
+
+  return card;
+}
+
+function sparkline(pesos, w = 80, h = 34) {
+  if (pesos.length < 2) {
+    return `<svg width="${w}" height="${h}"><circle cx="${w / 2}" cy="${h / 2}" r="3" fill="currentColor" opacity="0.5"/></svg>`;
+  }
+  const min = Math.min(...pesos);
+  const max = Math.max(...pesos);
+  const range = max - min || 1;
+  const pad = 4;
+  const pts = pesos.map((v, i) => {
+    const x = ((i / (pesos.length - 1)) * (w - pad * 2) + pad).toFixed(1);
+    const y = (h - pad - ((v - min) / range) * (h - pad * 2)).toFixed(1);
+    return `${x},${y}`;
+  });
+  const [lastX, lastY] = pts[pts.length - 1].split(',');
+  return `
+    <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <polyline points="${pts.join(' ')}" fill="none" stroke="currentColor" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+      <circle cx="${lastX}" cy="${lastY}" r="3" fill="currentColor"/>
+    </svg>`;
 }

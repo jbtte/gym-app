@@ -36,7 +36,6 @@ h1, h2 {
     width: 100%;
     background-color: var(--card-bg);
     color: var(--text-main);
-    border: none;
     border: 1px solid rgba(255,255,255,0.05);
     padding: 18px 20px;
     margin-bottom: 10px;
@@ -97,6 +96,33 @@ h1, h2 {
     gap: 10px;
 }
 
+.group-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-sec);
+    padding: 0 4px;
+    margin-bottom: 6px;
+}
+
+.group-cards {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.group-cards .exercise-card {
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.group-cards .exercise-card:last-child {
+    border-bottom: none;
+}
+
 .exercise-card {
     display: flex;
     align-items: center;
@@ -134,14 +160,7 @@ h1, h2 {
 .exercise-details {
     font-size: 0.9rem;
     color: var(--text-sec);
-}
-
-.exercise-details span { color: var(--text-main); }
-
-.exercise-details {
-    font-size: 0.9rem;
-    color: var(--text-sec);
-    line-height: 1.4; /* Melhora leitura de textos com 2 linhas */
+    line-height: 1.4;
 }
 
 .exercise-details span {
@@ -184,6 +203,64 @@ small {
 .peso-btn:active {
     color: var(--text-main);
 }
+
+.progress-link {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-sec);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px 0 4px;
+    cursor: pointer;
+}
+.progress-link:hover { color: var(--text-main); }
+
+.progress-card {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    gap: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.progress-info { flex: 1; min-width: 0; }
+
+.progress-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.progress-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+}
+
+.progress-weight {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.progress-delta {
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+.delta-pos { color: var(--pernas); }
+.delta-neg { color: var(--biceps); }
+
+.progress-count { color: var(--text-sec); }
+
+.sparkline { flex-shrink: 0; }
 
 #btn-finalizar {
     display: block;
