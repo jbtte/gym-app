@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gymapp-v2';
+const CACHE_NAME = 'gymapp-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -6,13 +6,14 @@ const ASSETS = [
   './script.js',
   './manifest.json',
   './icon.png',
+  './admin/treino.json',
 ];
 
-// Instala e faz o cache dos arquivos
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)),
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -21,13 +22,19 @@ self.addEventListener('activate', (event) => {
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     )
   );
+  self.clients.claim();
 });
 
-// Responde com o cache quando estiver offline
+// Stale-while-revalidate: serve do cache imediatamente e atualiza em background
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    }),
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cached = await caches.match(event.request);
+      const networkFetch = fetch(event.request).then((response) => {
+        if (response.ok) cache.put(event.request, response.clone());
+        return response;
+      }).catch(() => null);
+      return cached || await networkFetch;
+    })
   );
 });
