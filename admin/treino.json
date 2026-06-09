@@ -1,0 +1,285 @@
+{
+  "treino": {
+    "segunda": {
+      "foco": ["peito", "ombro", "triceps", "perna"],
+      "exercicios": [
+        {
+          "nome": "Supino reto barra",
+          "series": "4",
+          "repeticoes": "6–8",
+          "peso": "32 kg",
+          "grupo_muscular_principal": "peito",
+          "metodologia": "superset A — par com Desenvolvimento halter, mesmo banco"
+        },
+        {
+          "nome": "Desenvolvimento halter",
+          "series": "4",
+          "repeticoes": "10–12",
+          "peso": "24 kg",
+          "grupo_muscular_principal": "ombro",
+          "metodologia": "superset A — par com Supino reto barra, mesmo banco; descansa 60s após o par"
+        },
+        {
+          "nome": "Elevação lateral",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "9 kg",
+          "grupo_muscular_principal": "ombro",
+          "metodologia": "superset B — par com Agachamento goblet; usa o mesmo halter"
+        },
+        {
+          "nome": "Agachamento goblet",
+          "series": "3",
+          "repeticoes": "12",
+          "peso": "9 kg",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "superset B — par com Elevação lateral; segura o mesmo halter da elevação"
+        },
+        {
+          "nome": "Tríceps corda",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "27 kg",
+          "grupo_muscular_principal": "triceps",
+          "metodologia": "finalizador — isolado, cabo"
+        },
+        {
+          "nome": "Bike intervalada",
+          "series": "—",
+          "repeticoes": "12 min (30s forte / 60s leve)",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio",
+          "metodologia": "finalizador"
+        }
+      ]
+    },
+    "terca": {
+      "foco": ["costas", "biceps", "perna"],
+      "exercicios": [
+        {
+          "nome": "Puxada máquina",
+          "series": "4",
+          "repeticoes": "6–8",
+          "peso": "80 kg",
+          "grupo_muscular_principal": "costas",
+          "metodologia": "superset A — par com Rosca no cabo; mesma estação, troca acessório para polia baixa"
+        },
+        {
+          "nome": "Rosca no cabo (barra reta)",
+          "series": "4",
+          "repeticoes": "10–12",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "biceps",
+          "metodologia": "superset A — par com Puxada máquina; polia baixa, mesma estação; descansa 60s após o par"
+        },
+        {
+          "nome": "Remada halter apoiada",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "24 kg",
+          "grupo_muscular_principal": "costas",
+          "metodologia": "superset B — par com Stiff halter; mesmo banco e mesmo halter"
+        },
+        {
+          "nome": "Stiff halter",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "24 kg",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "superset B — par com Remada halter apoiada; mesmo banco; descansa 60s após o par"
+        },
+        {
+          "nome": "Pullover halter",
+          "series": "2",
+          "repeticoes": "12",
+          "peso": "27 kg",
+          "grupo_muscular_principal": "costas",
+          "metodologia": "finalizador — isolado"
+        },
+        {
+          "nome": "Panturrilha em pé (escada ou step)",
+          "series": "3",
+          "repeticoes": "15–20",
+          "peso": "peso corporal",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "finalizador — isolado, sem equipamento"
+        },
+        {
+          "nome": "Remo ou escada",
+          "series": "—",
+          "repeticoes": "12 min contínuo",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio",
+          "metodologia": "finalizador"
+        }
+      ]
+    },
+    "quarta": {
+      "foco": ["perna", "core", "cardio"],
+      "exercicios": [
+        {
+          "nome": "Agachamento sumô halter",
+          "series": "3",
+          "repeticoes": "12",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "circuito — 3 voltas, 45s descanso entre voltas; sem máquina fixa"
+        },
+        {
+          "nome": "Avanço estático",
+          "series": "3",
+          "repeticoes": "10 por lado",
+          "peso": "peso corporal",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "circuito — com halteres se disponível"
+        },
+        {
+          "nome": "Prancha",
+          "series": "3",
+          "repeticoes": "40s",
+          "peso": "—",
+          "grupo_muscular_principal": "core",
+          "metodologia": "circuito"
+        },
+        {
+          "nome": "Dead bug",
+          "series": "3",
+          "repeticoes": "10 por lado",
+          "peso": "—",
+          "grupo_muscular_principal": "core",
+          "metodologia": "circuito"
+        },
+        {
+          "nome": "Elevação de quadril (glúteo)",
+          "series": "3",
+          "repeticoes": "15",
+          "peso": "—",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "circuito — com halter no quadril se quiser carga"
+        },
+        {
+          "nome": "Corrida",
+          "series": "—",
+          "repeticoes": "25 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio",
+          "metodologia": "ritmo estável ou fartlek 1min forte / 2min leve"
+        }
+      ]
+    },
+    "quinta": {
+      "foco": ["peito", "costas", "perna", "ombro", "biceps", "triceps"],
+      "exercicios": [
+        {
+          "nome": "Supino inclinado halter",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "22 kg",
+          "grupo_muscular_principal": "peito",
+          "metodologia": "superset A — par com Remada halter apoiada; mesmo banco, ajusta encosto"
+        },
+        {
+          "nome": "Remada halter apoiada",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "24 kg",
+          "grupo_muscular_principal": "costas",
+          "metodologia": "superset A — par com Supino inclinado halter; mesmo banco; descansa 60s após o par"
+        },
+        {
+          "nome": "Agachamento goblet",
+          "series": "3",
+          "repeticoes": "12",
+          "peso": "28 kg",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "superset B — par com Elevação lateral; halter portátil, sem equipamento fixo"
+        },
+        {
+          "nome": "Elevação lateral",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "9 kg",
+          "grupo_muscular_principal": "ombro",
+          "metodologia": "superset B — par com Agachamento goblet; descansa 60s após o par"
+        },
+        {
+          "nome": "Rosca no cabo",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "biceps",
+          "metodologia": "drop set — última série: reduz 20% da carga e vai até nova falha; mesma estação do tríceps"
+        },
+        {
+          "nome": "Tríceps corda",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "25 kg",
+          "grupo_muscular_principal": "triceps",
+          "metodologia": "drop set — última série: reduz 20% da carga e vai até nova falha; mesma estação da rosca, troca acessório"
+        },
+        {
+          "nome": "Bike leve",
+          "series": "—",
+          "repeticoes": "10 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio",
+          "metodologia": "finalizador"
+        }
+      ]
+    },
+    "sexta": {
+      "foco": ["biceps", "triceps", "ombro", "perna"],
+      "exercicios": [
+        {
+          "nome": "Paralela",
+          "series": "3",
+          "repeticoes": "até falha técnica",
+          "peso": "peso corporal",
+          "grupo_muscular_principal": "triceps",
+          "metodologia": "bi-set A — par com Rosca alternada halter; peso corporal, sem ocupar máquina"
+        },
+        {
+          "nome": "Rosca alternada halter",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "16 kg",
+          "grupo_muscular_principal": "biceps",
+          "metodologia": "bi-set A — par com Paralela; pega o halter direto após a paralela; descansa 60s após o par"
+        },
+        {
+          "nome": "Face pull",
+          "series": "3",
+          "repeticoes": "12–15",
+          "peso": "30 kg",
+          "grupo_muscular_principal": "ombro",
+          "metodologia": "superset B — par com Tríceps corda; polia alta → baixa, mesma estação de cabo"
+        },
+        {
+          "nome": "Tríceps corda",
+          "series": "3",
+          "repeticoes": "10–12",
+          "peso": "27 kg",
+          "grupo_muscular_principal": "triceps",
+          "metodologia": "superset B — par com Face pull; polia baixa, mesmo cabo; descansa 60s após o par"
+        },
+        {
+          "nome": "Abdutor / Glúteo máquina",
+          "series": "2",
+          "repeticoes": "12–15",
+          "peso": "—",
+          "grupo_muscular_principal": "perna",
+          "metodologia": "finalizador — única máquina do dia, isolado, rápido"
+        },
+        {
+          "nome": "Bike ou escada",
+          "series": "—",
+          "repeticoes": "12 min",
+          "peso": "—",
+          "grupo_muscular_principal": "cardio",
+          "metodologia": "finalizador"
+        }
+      ]
+    }
+  }
+}

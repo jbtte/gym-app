@@ -1,3 +1,5 @@
-admin/
+admin/.env
+admin/migrate.py
+admin/index.html
 data/
 FLUXO.md
