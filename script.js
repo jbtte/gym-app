@@ -1,7 +1,81 @@
-// Configurações do Supabase (Substitua pelos seus dados do Painel > Settings > API)
-const supabaseUrl = 'https://vmoexatgbxjgaiaqgljp.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtb2V4YXRnYnhqZ2FpYXFnbGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTU3MTUsImV4cCI6MjA4NzA5MTcxNX0.g0g2T75guHP1NPZVVohMSRTPPE2W9CQDJ9wLoe_XglM';
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// ── localStorage helpers ──────────────────────────────────────────────────────
+
+const PESOS_KEY = 'gym_pesos';
+const LOGS_KEY  = 'gym_logs';
+
+function getPesos() {
+  try { return JSON.parse(localStorage.getItem(PESOS_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function savePeso(nome, peso) {
+  const pesos = getPesos();
+  pesos[nome] = peso;
+  localStorage.setItem(PESOS_KEY, JSON.stringify(pesos));
+}
+
+function getLogs() {
+  try { return JSON.parse(localStorage.getItem(LOGS_KEY)) || []; }
+  catch { return []; }
+}
+
+function appendLogs(entries) {
+  const logs = getLogs();
+  logs.push(...entries);
+  localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+}
+
+// ── JSON loader ───────────────────────────────────────────────────────────────
+
+let _treino = null;
+
+async function getTreino() {
+  if (_treino) return _treino;
+  const res = await fetch('./admin/treino.json');
+  const { treino } = await res.json();
+  _treino = treino;
+  return _treino;
+}
+
+function parseExercicio(ex, pesos) {
+  const nome = ex.nome;
+
+  const series = parseInt(ex.series) || null;
+
+  let repeticoes_min = null, repeticoes_max = null, is_ate_falha = false;
+  const reps = (ex.repeticoes || '').trim().toLowerCase();
+  if (reps.includes('falha')) {
+    is_ate_falha = true;
+  } else {
+    const m = reps.match(/^(\d+)(?:[–\-](\d+))?/);
+    if (m) {
+      repeticoes_min = parseInt(m[1]);
+      repeticoes_max = m[2] ? parseInt(m[2]) : parseInt(m[1]);
+    }
+  }
+
+  const pesoStr = (ex.peso || '').trim().toLowerCase();
+  let pesoDefault = 0;
+  const pesoMatch = pesoStr.match(/(\d+(?:\.\d+)?)\s*kg/);
+  if (pesoMatch) pesoDefault = parseFloat(pesoMatch[1]);
+
+  const peso_atual = pesos[nome] !== undefined ? pesos[nome] : pesoDefault;
+
+  return {
+    id: nome,
+    nome,
+    series,
+    repeticoes_min,
+    repeticoes_max,
+    is_ate_falha,
+    peso_atual,
+    grupo_muscular: ex.grupo_muscular_principal,
+    metodologia: ex.metodologia || null,
+    notas_extras: null,
+  };
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   iniciarApp();
@@ -12,30 +86,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Renderiza os botões dos dias na Home
 async function iniciarApp() {
   const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
   const daysList = document.getElementById('days-list');
   daysList.innerHTML = '';
 
-  const { data } = await _supabase
-    .from('exercicios')
-    .select('dia_semana, grupo_muscular')
-    .order('ordem', { ascending: true });
-
-  const gruposPorDia = {};
-  (data || []).forEach(({ dia_semana, grupo_muscular }) => {
-    if (!gruposPorDia[dia_semana]) gruposPorDia[dia_semana] = [];
-    if (!gruposPorDia[dia_semana].includes(grupo_muscular)) {
-      gruposPorDia[dia_semana].push(grupo_muscular);
-    }
-  });
+  const treino = await getTreino();
 
   dias.forEach((dia) => {
+    const diaData = treino[dia];
     const btn = document.createElement('button');
     btn.className = 'day-btn';
     const titulo = dia.charAt(0).toUpperCase() + dia.slice(1);
-    const gruposlista = (gruposPorDia[dia] || []).slice(0, 4);
+    const gruposlista = (diaData?.foco || []).slice(0, 4);
     const corPrincipal = `var(--${gruposlista[0] || 'cardio'})`;
     const grupos = gruposlista
       .map((g) => g.charAt(0).toUpperCase() + g.slice(1))
@@ -47,35 +110,26 @@ async function iniciarApp() {
         <span class="day-groups">${grupos}</span>
       </div>
     `;
-    btn.onclick = () => carregarTreinoDoBanco(dia);
+    btn.onclick = () => carregarTreino(dia);
     daysList.appendChild(btn);
   });
 }
 
-// Busca os exercícios do Supabase
-async function carregarTreinoDoBanco(dia) {
+// ── Carregar treino ───────────────────────────────────────────────────────────
+
+async function carregarTreino(dia) {
   document.getElementById('home-view').classList.add('hidden');
   document.getElementById('workout-view').classList.remove('hidden');
   document.getElementById('workout-title').innerText = `Treino de ${dia}`;
 
   const listContainer = document.getElementById('exercise-list');
-  listContainer.innerHTML =
-    '<p style="text-align:center; padding:20px;">Buscando ficha no banco...</p>';
-
-  const { data, error } = await _supabase
-    .from('exercicios')
-    .select('*')
-    .eq('dia_semana', dia)
-    .order('ordem', { ascending: true });
-
-  if (error) {
-    console.error('Erro:', error);
-    listContainer.innerHTML = '<p>Erro ao conectar com o banco de dados.</p>';
-    return;
-  }
-
   listContainer.innerHTML = '';
-  agruparExercicios(data).forEach((grupo) => {
+
+  const treino = await getTreino();
+  const pesos = getPesos();
+  const exercicios = (treino[dia]?.exercicios || []).map((ex) => parseExercicio(ex, pesos));
+
+  agruparExercicios(exercicios).forEach((grupo) => {
     listContainer.appendChild(renderGrupo(grupo));
   });
 
@@ -84,6 +138,8 @@ async function carregarTreinoDoBanco(dia) {
   btnFinalizar.disabled = false;
   btnFinalizar.classList.remove('hidden');
 }
+
+// ── Agrupamento ───────────────────────────────────────────────────────────────
 
 function parseGrupoKey(metodologia) {
   if (!metodologia) return null;
@@ -154,21 +210,21 @@ function renderGrupo(grupo) {
   return wrapper;
 }
 
-// Cria o HTML do exercício baseado no Schema Pro
+// ── Card de exercício ─────────────────────────────────────────────────────────
+
 function criarCardExercicio(ex, showMetodologia = true) {
   const card = document.createElement('div');
   card.className = 'exercise-card';
   card.dataset.id = ex.id;
+  card.dataset.grupo = ex.grupo_muscular || 'cardio';
   const corGrupo = `var(--${ex.grupo_muscular || 'cardio'})`;
 
-  // Lógica para Repetições (Schema Pro)
   let repsDisplay = ex.is_ate_falha
     ? 'Até a falha'
     : ex.repeticoes_min === ex.repeticoes_max
       ? `${ex.repeticoes_min}`
       : `${ex.repeticoes_min}-${ex.repeticoes_max}`;
 
-  // Lógica para Peso (Se 0 ou nulo, exibe 'Corpo')
   let pesoDisplay =
     ex.peso_atual && ex.peso_atual > 0 ? `${ex.peso_atual} kg` : 'Corpo';
 
@@ -204,26 +260,19 @@ function criarCardExercicio(ex, showMetodologia = true) {
   return card;
 }
 
-async function atualizarPeso(ctrl, delta) {
+function atualizarPeso(ctrl, delta) {
   const id = ctrl.dataset.id;
   const pesoAtual = parseFloat(ctrl.dataset.peso);
   const novoPeso = Math.max(0.5, pesoAtual + delta);
 
-  const { error } = await _supabase
-    .from('exercicios')
-    .update({ peso_atual: novoPeso })
-    .eq('id', id);
-
-  if (error) {
-    console.error('Erro ao atualizar peso:', error);
-    return;
-  }
+  savePeso(id, novoPeso);
 
   ctrl.dataset.peso = novoPeso;
   ctrl.querySelector('.peso-display').textContent = `${novoPeso} kg`;
 }
 
-// Swipe Direita: CONCLUÍDO
+// ── Swipe ─────────────────────────────────────────────────────────────────────
+
 function adicionarEventosSwipe(elemento, ex) {
   let touchStartX = 0;
   const threshold = 80;
@@ -234,44 +283,37 @@ function adicionarEventosSwipe(elemento, ex) {
     { passive: true },
   );
 
-  elemento.addEventListener('touchend', async (e) => {
+  elemento.addEventListener('touchend', (e) => {
     const touchEndX = e.changedTouches[0].screenX;
     const diffX = touchEndX - touchStartX;
-
     if (diffX > threshold) {
       elemento.classList.toggle('done');
     }
   });
 }
 
-async function finalizarTreino() {
+// ── Finalizar treino ──────────────────────────────────────────────────────────
+
+function finalizarTreino() {
   const cards = document.querySelectorAll('.exercise-card.done');
   if (cards.length === 0) {
     alert('Marque pelo menos um exercício antes de finalizar.');
     return;
   }
 
-  const btn = document.getElementById('btn-finalizar');
-  btn.disabled = true;
-
-  const logs = Array.from(cards).map((card) => {
+  const now = new Date().toISOString();
+  const entries = Array.from(cards).map((card) => {
     const pesoCtrl = card.querySelector('.peso-ctrl');
     return {
-      exercicio_id: card.dataset.id,
+      created_at: now,
       nome_exercicio: card.querySelector('.exercise-name').textContent,
+      grupo_muscular: card.dataset.grupo || 'cardio',
       concluido: true,
       peso_usado: pesoCtrl ? parseFloat(pesoCtrl.dataset.peso) || null : null,
     };
   });
 
-  const { error } = await _supabase.from('logs_treino').insert(logs);
-
-  if (error) {
-    console.error('Erro ao finalizar treino:', error);
-    btn.disabled = false;
-    return;
-  }
-
+  appendLogs(entries);
   voltarParaHome();
 }
 
@@ -282,29 +324,20 @@ function voltarParaHome() {
   document.getElementById('home-view').classList.remove('hidden');
 }
 
-async function carregarProgresso() {
+// ── Progressão ────────────────────────────────────────────────────────────────
+
+function carregarProgresso() {
   document.getElementById('home-view').classList.add('hidden');
   document.getElementById('progress-view').classList.remove('hidden');
 
   const container = document.getElementById('progress-list');
-  container.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-sec)">Carregando...</p>';
 
-  const { data, error } = await _supabase
-    .from('logs_treino')
-    .select('created_at, peso_usado, nome_exercicio, exercicios(nome, grupo_muscular)')
-    .not('peso_usado', 'is', null)
-    .gt('peso_usado', 0)
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    container.innerHTML = '<p style="text-align:center;padding:40px;">Erro ao carregar dados.</p>';
-    return;
-  }
+  const logs = getLogs().filter((l) => l.peso_usado && l.peso_usado > 0);
 
   const byExercise = {};
-  (data || []).forEach((log) => {
-    const nome = log.exercicios?.nome || log.nome_exercicio;
-    const grupo = log.exercicios?.grupo_muscular || 'cardio';
+  logs.forEach((log) => {
+    const nome = log.nome_exercicio;
+    const grupo = log.grupo_muscular || 'cardio';
     if (!nome) return;
     if (!byExercise[nome]) byExercise[nome] = { grupo, entradas: [] };
     byExercise[nome].entradas.push({
